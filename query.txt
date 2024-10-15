@@ -1,0 +1,4 @@
+SELECT Id,AppliedDiscount__c,FinalProduct__c,ParentProduct__c,OLDProductNameTranslation__c,LicenseModel__c,PositionNumber__c,UnitPriceRound__c,ListPriceFormula__c,RegularTotal__c,ListUnitPrice__c,ProductPeriod__c,DocuSign_Quantity__c,Starting_Price__c,Rechnungsposten_Account__c,ProductNameTranslation__c,DatevCustomerID__c,Net_Unit_Price__c,
+        (SELECT Id,CurrencyFormula__c,RevenueFinancePeriodFormula__c,RevenueScheduleFormula__c
+FROM blng__InvoiceLineRevenueTransactions__r)
+FROM blng__InvoiceLine__c
