@@ -1,25 +1,30 @@
-. .\Invoke-SfCli.ps1
+. 'C:\Users\parsa\OneDrive - PINKTUM\src\TreeQuery\Invoke-SfCli.ps1'
 
 class SOQL {
     [Object]$DescribeInfo
     [String]$SobjectName
     [Object]$FieldNames
-    [Object]$InnerQueries
+    [Object]$ChildQueries
     [String]$WhereClause
     [Object]$OrderByFields
     [String]$OrderByDirection
     [Int]$Limit
-
+    
+    [String[]]$GroupedFieldNames
     [Switch]$IsRelationship
     [Int]$Depth
+    
+    [Boolean]$IsVerbose
 
-    SOQL([String]$SobjectName) {
-        $this.Depth = 1
+    SOQL([String]$SobjectName, [Boolean]$IsVerbose) {
+        $this.IsVerbose = $IsVerbose
+        $this.Depth = 0
         $this.SobjectName = $SobjectName
         $this.DescribeInfo = $this.GetCachedDescribe()
         $this.FieldNames = New-Object System.Collections.Generic.HashSet[String]
-        $this.InnerQueries = New-Object System.Collections.Generic.HashSet[String]
+        $this.ChildQueries = New-Object System.Collections.Generic.HashSet[String]
         $this.OrderByFields = New-Object System.Collections.Generic.HashSet[String]
+        $this.GroupedFieldNames = @()
         $this.AddField('Id')
     }
 
@@ -27,13 +32,18 @@ class SOQL {
         $this.FieldNames.Add($FieldName) | Out-Null
     }
 
-    [void] AddField([SOQL]$InnerSOQL) {
-        $this.InnerQueries.Add($InnerSOQL.GetQuery()) | Out-Null
+    [void] AddField([SOQL]$InnerSOQL, [String]$RelationshipName) {
+        $this.ChildQueries.Add($InnerSOQL.GetQuery($RelationshipName)) | Out-Null
     }
 
-    [void] AddField([String]$RelationshipFieldName, [Object]$FieldNames) {
-        foreach ($FieldName in $FieldNames) {
-            $this.AddField("$RelationshipFieldName.$FieldName")
+    [void] AddFieldString([String]$FieldName) {
+        $this.AddField($FieldName)
+    }
+
+    [void] AddRelationshipFields([String]$RelationshipFieldName, [Object]$FieldNames) {
+        $ConcatenatedFieldNames = $FieldNames -replace '^', "$RelationshipFieldName."
+        foreach ($FieldName in $ConcatenatedFieldNames) {
+            $this.AddField($FieldName)
         }
     }
 
@@ -49,22 +59,23 @@ class SOQL {
         }
     }
 
-    [void] AddFields([SOQL]$InnerSOQL) {
-        $InnerSOQL.SobjectName = $this.GetCachedDescribe().childRelationships | Where-Object {
-            $_.childSObject -eq $InnerSOQL.SobjectName
-        } | Select-Object -ExpandProperty relationshipName
-        if ($InnerSOQL.SobjectName) {
-            $InnerSOQL.Depth += 1
-            $this.AddField($InnerSOQL)
-        }
+    [void] AddChildQueries([ScriptBlock]$RelationshipSelector, [SOQL]$InnerSOQL) {
+        $this.GetCachedDescribe().childRelationships `
+            | Where-Object { $_.childSObject -eq $InnerSOQL.GetSObjectName() } `
+            | Where-Object $RelationshipSelector `
+            | ForEach-Object {
+                $InnerSOQL.Depth += 1
+                $this.AddField($InnerSOQL, $_.relationshipName)
+            }
     }
 
-    [void] AddParentQuery([SOQL]$ParentSOQL) {
-        $this.GetCachedDescribe().fields | Where-Object {
-            $_.type -eq 'reference' -and $_.referenceTo -contains $ParentSOQL.SobjectName
-        } | ForEach-Object {
-            $this.AddField($_.relationshipName, $ParentSOQL.FieldNames)
-        }
+    [void] AddParentQueries([ScriptBlock]$RelationFieldSelector, [SOQL]$ParentSOQL) {
+        $this.GetCachedDescribe().fields `
+            | Where-Object { $_.type -eq 'reference' -and $_.referenceTo -contains $ParentSOQL.GetSObjectName() } `
+            | Where-Object $RelationFieldSelector `
+            | ForEach-Object {
+                $this.AddRelationshipFields($_.relationshipName, $ParentSOQL.FieldNames)
+            }
     }
 
     [void] AddWhere([String]$WhereClause) {
@@ -73,7 +84,7 @@ class SOQL {
 
     [void] AddOrderBy([ScriptBlock]$Selector, [String]$Direction) {
         $this.OrderByDirection = $Direction
-        
+
         $temp = $this.GetCachedDescribe().fields `
             | Where-Object { $_.sortable } `
             | Where-Object $Selector `
@@ -92,30 +103,39 @@ class SOQL {
     }
 
     [String] GetSelectElements() {
+        $tabs = $this.GetTabs()
+
         $FieldElements = @()
         $FieldNamesList = New-Object System.Collections.Generic.List[String] -ArgumentList $this.FieldNames
         $FieldNamesJoined = [System.String]::Join(',', $FieldNamesList)
         $FieldElements += $FieldNamesJoined
-        
-        $InnerQueriesList = New-Object System.Collections.Generic.List[String] -ArgumentList $this.InnerQueries
-        $InnerQueriesJoined = [System.String]::Join(',', $InnerQueriesList)
-        if ($InnerQueriesJoined) {
-            $FieldElements += $InnerQueriesJoined
-        }
 
-        $tabs = $this.GetTabs()
+        $GroupedFieldNamesJoined = [System.String]::Join(",`n$tabs", $this.GroupedFieldNames)
+        if ($GroupedFieldNamesJoined) {
+            $FieldElements += $GroupedFieldNamesJoined
+        }
+        
+        $ChildQueriesList = New-Object System.Collections.Generic.List[String] -ArgumentList $this.ChildQueries
+        $ChildQueriesJoined = [System.String]::Join(',', $ChildQueriesList)
+        if ($ChildQueriesJoined) {
+            $FieldElements += $ChildQueriesJoined
+        }
 
         return $FieldElements -join ",`n$tabs"
     }
 
     [String] GetQuery() {
+        return $this.GetQuery($this.SobjectName)
+    }
+
+    [String] GetQuery([String]$FromName) {
         # $QueryString = "SELECT $($this.GetSelectElements()) FROM $($this.SobjectName)"
-        # $tabs = $this.GetTabs()
+        $tabs = $this.GetTabs()
 
         $QueryPieces = @()
 
         $QueryPieces += "SELECT $($this.GetSelectElements())"
-        $QueryPieces += "FROM $($this.SobjectName)"
+        $QueryPieces += "FROM $FromName"
 
         if ($this.WhereClause) {
             $QueryPieces[-1] += " WHERE $($this.WhereClause)"
@@ -133,12 +153,15 @@ class SOQL {
 
         # $QueryPieces[-1] += " ORDER BY Name ASC NULLS FIRST"
 
-        # $QueryString = $QueryPieces -join "`n"
-        $QueryString = $QueryPieces -join " "
+        $QueryString = $QueryPieces -join "`n$tabs"
+        # $QueryString = $QueryPieces -join " "
 
         if ($this.IsRelationship) {
             $QueryString = "($QueryString)"
         }
+
+        $QueryString = "$tabs$QueryString"
+
         return $QueryString
     }
 
@@ -151,7 +174,7 @@ class SOQL {
         if ($null -ne $cachedResults) {
             return $cachedResults.Value
         }
-        $results = Invoke-SfCli -Command "sobject describe -s $($this.SobjectName)"
+        $results = Invoke-SfCli -Command "sobject describe -s $($this.SobjectName)" -Debug $this.IsVerbose
         $this.SetCachedDescribe($results)
         return $results
     }
