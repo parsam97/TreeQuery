@@ -74,6 +74,17 @@ class SOQLBuilder {
         foreach ($SobjectName in $SobjectNames) {
             $this.SoqlArray += [SOQL]::new($SobjectName, $this.IsVerbose)
         }
+
+        if ($this.SoqlArray.Count -eq 0) {
+            $ConfigList = Invoke-SfCli -Command 'config list' -Debug $this.IsVerbose
+            $AliasList = Invoke-SfCli -Command 'alias list' -Debug $this.IsVerbose
+
+            $TargetOrgAlias = $ConfigList | Where-Object { $_.key -eq 'target-org'} | Select-Object -ExpandProperty value
+            $TargetOrgUsername = $AliasList | Where-Object { $_.alias -eq $TargetOrgAlias } | Select-Object -ExpandProperty value
+
+            Write-Host "Nothing found. Signed in as $TargetOrgUsername ($TargetOrgAlias)"
+        }
+
         return $this
     }
 
@@ -117,6 +128,13 @@ class SOQLBuilder {
     [SOQLBuilder] AddLimit([Int]$Limit) {
         foreach ($Soql in $this.SoqlArray) {
             $Soql.AddLimit($Limit)
+        }
+        return $this
+    }
+
+    [SOQLBuilder] AddOffset([Int]$Offset) {
+        foreach ($Soql in $this.SoqlArray) {
+            $Soql.AddOffset($Offset)
         }
         return $this
     }
@@ -173,7 +191,7 @@ class SOQLBuilder {
         $SoqlDirs | ForEach-Object {
             $SoqlDirectory = $_
             $OutputDirectory = (Get-Item $SoqlDirectory).Directory.FullName
-            $Command = "data export beta tree -d '$OutputDirectory' -q '$SoqlDirectory' -x $FileNamePrefix"
+            $Command = "data export beta tree --output-dir '$OutputDirectory' --query '$SoqlDirectory' --prefix $FileNamePrefix --plan"
             Invoke-SfCli -Command $Command -Debug $this.IsVerbose
         }
     }
