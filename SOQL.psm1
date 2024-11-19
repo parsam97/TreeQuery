@@ -9,6 +9,7 @@ class SOQL {
     [Object]$OrderByFields
     [String]$OrderByDirection
     [Int]$Limit
+    [Int]$Offset
     
     [String[]]$GroupedFieldNames
     [Switch]$IsRelationship
@@ -98,6 +99,10 @@ class SOQL {
         $this.Limit = $Limit
     }
 
+    [void] AddOffset([Int]$Offset) {
+        $this.Offset = $Offset
+    }
+
     [Object] GetTabs() {
         return "`t" * $this.Depth
     }
@@ -149,6 +154,10 @@ class SOQL {
 
         if ($this.Limit) {
             $QueryPieces += "LIMIT $($this.Limit)"
+        }
+
+        if ($this.Offset) {
+            $QueryPieces += "OFFSET $($this.Offset)"
         }
 
         # $QueryPieces[-1] += " ORDER BY Name ASC NULLS FIRST"
