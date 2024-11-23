@@ -180,18 +180,23 @@ class SOQLBuilder {
     }
 
     [SOQLBuilder] Execute() {
+        return $this.Execute($False)
+    }
+
+    [SOQLBuilder] Execute([Boolean]$WithPlan) {
         $SoqlDirs = $this.ExportToFile('temp')
-        $this.ExecuteQueries($SoqlDirs)
+        $this.ExecuteQueries($SoqlDirs, $WithPlan)
         $this.RemoveQueryTemps($SoqlDirs)
         return $this
     }
 
-    [void] ExecuteQueries([String[]]$SoqlDirs) {
+    [void] ExecuteQueries([String[]]$SoqlDirs, [Boolean]$WithPlan) {
         $FileNamePrefix = $this.JobName
         $SoqlDirs | ForEach-Object {
             $SoqlDirectory = $_
             $OutputDirectory = (Get-Item $SoqlDirectory).Directory.FullName
-            $Command = "data export beta tree --output-dir '$OutputDirectory' --query '$SoqlDirectory' --prefix $FileNamePrefix --plan"
+            $Command = "data export beta tree --output-dir '$OutputDirectory' --query '$SoqlDirectory' --prefix $FileNamePrefix"
+            if ($WithPlan) { $Command += " --plan" }
             Invoke-SfCli -Command $Command -Debug $this.IsVerbose
         }
     }
