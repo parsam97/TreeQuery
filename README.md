@@ -64,7 +64,7 @@ SELECT Id, MyCustomField__c, Account.Id, Account.MyCustomField__c
 FROM Contact
 ```
 
-Let's say you want to SOQL queries for every CPQ object that may or may not be the parent to an Account record:
+Let's say you want SOQL queries for every CPQ object that may or may not be the parent to an Account record:
 
 ```Powershell
 [SOQLBuilder]::new().
@@ -81,7 +81,7 @@ Note: If there was no parent Account for an object, the SOQL file is still creat
 
 ### Inner Queries
 
-This is the fun one. Usually we do not remember off the top of the head what the relationship name of a particular relationship is between two objects. Sometimes, you may not even know if the relationship exists or not. This often happens when you are trying to debug an issue and cannot figure out where the problem lies.
+This is the fun one. Usually we don't remember off the top of our head what the relationship name of a particular relationship is between two objects. Sometimes, you may not even know if the relationship exists or not. This often happens when you are trying to debug an issue and cannot figure out where the problem lies.
 
 Let's start simple. Let's say you want to retrieve Contacts of some Accounts. 
 
@@ -89,7 +89,7 @@ Let's start simple. Let's say you want to retrieve Contacts of some Accounts.
 [SOQLBuilder]::new().
     AddSObjects({ $_ -eq 'Account' }).
     AddFields().
-    AddParentQueries([SOQLBuilder]::new().
+    AddChildQueries([SOQLBuilder]::new().
         AddSObjects({ $_ -eq 'Contact' }).
         AddFields()
     ).
