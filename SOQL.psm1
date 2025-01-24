@@ -133,10 +133,11 @@ class SOQL {
         return $this.GetQuery($this.SobjectName)
     }
 
-    [String] GetQuery([String]$FromName) {
-        # $QueryString = "SELECT $($this.GetSelectElements()) FROM $($this.SobjectName)"
-        $tabs = $this.GetTabs()
+    [String] GetQueryClean() {
+        return $this.GetQueryPieces($this.SobjectName) -join " "
+    }
 
+    [Object] GetQueryPieces([String]$FromName) {
         $QueryPieces = @()
 
         $QueryPieces += "SELECT $($this.GetSelectElements())"
@@ -162,6 +163,13 @@ class SOQL {
 
         # $QueryPieces[-1] += " ORDER BY Name ASC NULLS FIRST"
 
+        return $QueryPieces
+    }
+
+    [String] GetQuery([String]$FromName) {
+        # $QueryString = "SELECT $($this.GetSelectElements()) FROM $($this.SobjectName)"
+        $QueryPieces = $this.GetQueryPieces($FromName)
+        $tabs = $this.GetTabs()
         $QueryString = $QueryPieces -join "`n$tabs"
         # $QueryString = $QueryPieces -join " "
 

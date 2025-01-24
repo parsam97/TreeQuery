@@ -171,7 +171,7 @@ class SOQLBuilder {
     }
 
     [Object[]] GetQueryTexts() {
-        return $this.SoqlArray | ForEach-Object { $_.GetQuery() }
+        return $this.SoqlArray | ForEach-Object { $_.GetQueryClean() }
     }
 
     [SOQLBuilder] Export() {
