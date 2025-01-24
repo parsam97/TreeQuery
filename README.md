@@ -276,6 +276,7 @@ FROM Account
 - [SOQLBuilder] AddChildQueries([SOQLBuilder]$ChildBuilder)
 - [SOQLBuilder] AddParentQueries([ScriptBlock]$RelationFieldSelector, [SOQLBuilder]$ParentBuilder)
 - [SOQLBuilder] AddParentQueries([SOQLBuilder]$ParentBuilder)
+- [SOQLBuilder] GetQueryTexts()
 - [SOQLBuilder] Export()
 - [SOQLBuilder] Export([Boolean]$WithPlan)
 - [SOQLBuilder] Execute() // uses `sf data export beta tree`
