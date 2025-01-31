@@ -13,6 +13,7 @@ class SOQL {
     
     [String[]]$GroupedFieldNames
     [Switch]$IsRelationship
+    [Switch]$ExcludeId
     [Int]$Depth
     
     [Boolean]$IsVerbose
@@ -112,6 +113,11 @@ class SOQL {
 
         $FieldElements = @()
         $FieldNamesList = New-Object System.Collections.Generic.List[String] -ArgumentList $this.FieldNames
+
+        if ($this.ExcludeId -and $FieldNamesList.Count -gt 1) {
+            $FieldNamesList.Remove('Id')
+        }
+
         $FieldNamesJoined = [System.String]::Join(',', $FieldNamesList)
         $FieldElements += $FieldNamesJoined
 

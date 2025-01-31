@@ -276,6 +276,7 @@ FROM Account
 - [SOQLBuilder] AddChildQueries([SOQLBuilder]$ChildBuilder)
 - [SOQLBuilder] AddParentQueries([ScriptBlock]$RelationFieldSelector, [SOQLBuilder]$ParentBuilder)
 - [SOQLBuilder] AddParentQueries([SOQLBuilder]$ParentBuilder)
+- [SOQLBuilder] ExcludeId()
 - [SOQLBuilder] GetQueryTexts()
 - [SOQLBuilder] Export()
 - [SOQLBuilder] Export([Boolean]$WithPlan)

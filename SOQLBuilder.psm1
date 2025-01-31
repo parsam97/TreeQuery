@@ -166,6 +166,13 @@ class SOQLBuilder {
         return $this.AddParentQueries({ $true }, $ParentBuilder)
     }
 
+    [SOQLBuilder] ExcludeId() {
+        foreach ($Soql in $this.SoqlArray) {
+            $Soql.ExcludeId = $true
+        }
+        return $this
+    }
+
     [Object[]] GetQueries() {
         return $this.SoqlArray
     }
