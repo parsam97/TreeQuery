@@ -82,7 +82,7 @@ class SOQLBuilder {
             $TargetOrgAlias = $ConfigList | Where-Object { $_.key -eq 'target-org'} | Select-Object -ExpandProperty value
             $TargetOrgUsername = $AliasList | Where-Object { $_.alias -eq $TargetOrgAlias } | Select-Object -ExpandProperty value
 
-            Write-Host "Nothing found. Signed in as $TargetOrgUsername ($TargetOrgAlias)"
+            Write-Host "Nothing found for selector $($Selector.ToString()). Signed in as $TargetOrgUsername ($TargetOrgAlias)"
         }
 
         return $this
