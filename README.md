@@ -280,4 +280,4 @@ FROM Account
 - [SOQLBuilder] GetQueryTexts()
 - [SOQLBuilder] Export()
 - [SOQLBuilder] Export([Boolean]$WithPlan)
-- [SOQLBuilder] Execute() // uses `sf data export beta tree`
+- [SOQLBuilder] Execute() // uses `sf data export tree`

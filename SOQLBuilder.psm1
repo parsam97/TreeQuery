@@ -202,7 +202,7 @@ class SOQLBuilder {
         $SoqlDirs | ForEach-Object {
             $SoqlDirectory = $_
             $OutputDirectory = (Get-Item $SoqlDirectory).Directory.FullName
-            $Command = "data export beta tree --output-dir '$OutputDirectory' --query '$SoqlDirectory' --prefix $FileNamePrefix"
+            $Command = "data export tree --output-dir '$OutputDirectory' --query '$SoqlDirectory' --prefix $FileNamePrefix"
             if ($WithPlan) { $Command += " --plan" }
             Invoke-SfCli -Command $Command -Debug $this.IsVerbose
         }
