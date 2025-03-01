@@ -1,6 +1,6 @@
 using module .\SOQL.psm1
 
-. 'C:\Users\parsa\OneDrive - PINKTUM\src\TreeQuery\Invoke-SfCli.ps1'
+. '.\Invoke-SfCli.ps1'
 
 class SOQLBuilder {
     [String]$JobName
@@ -71,6 +71,11 @@ class SOQLBuilder {
 
     [SOQLBuilder] AddSObjects([ScriptBlock]$Selector) {
         $SobjectNames = $this.GetCachedList() | Where-Object $Selector
+
+        if ($this.IsVerbose) {
+            Write-Host "$($SobjectNames.Count) selected objects: $($SobjectNames -join ", ")"
+        }
+
         foreach ($SobjectName in $SobjectNames) {
             $this.SoqlArray += [SOQL]::new($SobjectName, $this.IsVerbose)
         }
@@ -140,6 +145,8 @@ class SOQLBuilder {
     }
 
     [SOQLBuilder] AddChildQueries([ScriptBlock]$RelationFieldSelector, [SOQLBuilder]$ChildBuilder) {
+        if ($this.IsVerbose) { $ChildBuilder.MakeVerbose() }
+
         foreach ($Soql in $this.SoqlArray) {
             foreach ($ChildSoql in $ChildBuilder.SoqlArray) {
                 $ChildSoql.IsRelationship = $true

@@ -1,4 +1,4 @@
-. 'C:\Users\parsa\OneDrive - PINKTUM\src\TreeQuery\Invoke-SfCli.ps1'
+. '.\Invoke-SfCli.ps1'
 
 class SOQL {
     [Object]$DescribeInfo
