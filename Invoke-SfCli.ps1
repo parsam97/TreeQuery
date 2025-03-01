@@ -7,7 +7,7 @@ function Invoke-SfCli {
     $Command = "sf $Command --json"
 
     if ($Debug) {
-        Write-Host $Command
+        Write-Host $Command -ForegroundColor DarkGreen
     }
 
     $CliCall = Invoke-Expression $Command
@@ -18,10 +18,6 @@ function Invoke-SfCli {
     if ($ExitCode -ne 0 -or $CliCall.code -eq 1 -or $CliCall.status -ne 0) {
         Write-Host $CliCall.message -ForegroundColor Red
         return $ExitCode
-    }
-
-    if ($Debug) {
-        Write-Host $CliCall.result
     }
 
     return $CliCall.result
