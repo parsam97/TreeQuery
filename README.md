@@ -130,7 +130,7 @@ The example above finds the relationship name for you, while you simply specify 
     Export()
 ```
 
-You might think specifying the match is redundant. But TreeQuery will first resolve the inner `[SOQLBuilder]::new().AddSObjects({ $_ -match 'SBQQ__Product.*__c\b' })`. This will result in whatever objects that are found. Then it will ensure every one of the resulting objects are indeed defined as being a child relationship to the parent `Product2` object. After that, it will apply your selector `{ $_.childSObject -match 'SBQQ__Product.*__c\b' }`.
+You might think specifying the match is redundant. But TreeQuery will first resolve the inner `[SOQLBuilder]::new().AddSObjects({ $_ -match 'SBQQ__Product.*__c\b' })`. This will result in whatever objects that are found. Then it will ensure every one of the resulting objects are indeed defined as being a child relationship to the parent `Product2` object. After that, it will apply your selector `{ $_.childSObject -match 'SBQQ__Product.*__c\b' }`. Thus, going this route does not have any affect on the performance or speed of the request.
 
 ### Selector Options
 
