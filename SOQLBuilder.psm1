@@ -180,6 +180,10 @@ class SOQLBuilder {
         return $this
     }
 
+    [String] GetJobName() {
+        return $this.JobName
+    }
+
     [Object[]] GetQueries() {
         return $this.SoqlArray
     }
