@@ -1,6 +1,7 @@
 . '.\Invoke-SfCli.ps1'
 
 class SOQL {
+    [String]$CacheKey
     [Object]$DescribeInfo
     [String]$SobjectName
     [Object]$FieldNames
@@ -21,6 +22,7 @@ class SOQL {
     SOQL([String]$SobjectName, [Boolean]$IsVerbose) {
         $this.IsVerbose = $IsVerbose
         $this.Depth = 0
+        $this.CacheKey = "TreeQuery:$SobjectName"
         $this.SobjectName = $SobjectName
         $this.DescribeInfo = $this.GetCachedDescribe()
         $this.FieldNames = New-Object System.Collections.Generic.HashSet[String]
@@ -203,7 +205,7 @@ class SOQL {
     }
 
     [Object] GetCachedDescribe() {
-        $cachedResults = Get-Variable -Scope Global -Name $this.SobjectName -ErrorAction SilentlyContinue
+        $cachedResults = Get-Variable -Scope Global -Name $this.CacheKey -ErrorAction SilentlyContinue
         if ($null -ne $cachedResults) {
             return $cachedResults.Value
         }
@@ -213,6 +215,6 @@ class SOQL {
     }
 
     [void] SetCachedDescribe($value) {
-        Set-Variable -Scope Global -Name $this.SobjectName -Value $value
+        Set-Variable -Scope Global -Name $this.CacheKey -Value $value
     }
 }
