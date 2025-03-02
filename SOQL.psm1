@@ -61,6 +61,16 @@ class SOQL {
         }
     }
 
+    [void] AddFields([Object]$Fields) {
+        foreach ($Field in $Fields) {
+            $this.AddField($Field.name)
+        }
+    }
+    
+    [Object] GetFields([ScriptBlock]$Selector) {
+        return $this.GetCachedDescribe().fields | Where-Object $Selector
+    }
+
     [void] AddChildQueries([ScriptBlock]$RelationshipSelector, [SOQL]$InnerSOQL) {
         $this.GetCachedDescribe().childRelationships `
             | Where-Object { $_.childSObject -eq $InnerSOQL.GetSObjectName() } `
