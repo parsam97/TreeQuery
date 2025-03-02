@@ -262,6 +262,7 @@ FROM Account
 ### All SOQLBuilder methods
 
 - [SOQLBuilder] MakeVerbose()
+- [SOQLBuilder] MakeVerbose([Boolean]$MakeVerbose)
 - [SOQLBuilder] NameJob([String]$JobName)
 - [SOQLBuilder] AddSObjects([ScriptBlock]$Selector)
 - [SOQLBuilder] AddFields()

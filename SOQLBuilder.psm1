@@ -64,6 +64,11 @@ class SOQLBuilder {
         return $this
     }
 
+    [SOQLBuilder] MakeVerbose([Boolean]$MakeVerbose) {
+        $this.IsVerbose = $MakeVerbose
+        return $this
+    }
+
     [SOQLBuilder] NameJob([String]$JobName) {
         $this.JobName = $JobName
         return $this
