@@ -264,6 +264,7 @@ FROM Account
 - [SOQLBuilder] MakeVerbose()
 - [SOQLBuilder] MakeVerbose([Boolean]$MakeVerbose)
 - [SOQLBuilder] NameJob([String]$JobName)
+- [SOQLBuilder] PrintDefaultSf()
 - [SOQLBuilder] AddSObjects([ScriptBlock]$Selector)
 - [SOQLBuilder] AddFields()
 - [SOQLBuilder] AddFieldString([String]$Field)

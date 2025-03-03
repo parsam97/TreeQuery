@@ -74,6 +74,21 @@ class SOQLBuilder {
         return $this
     }
 
+    [SOQLBuilder] PrintDefaultSf() {
+        $Default = @{}
+        $OrgList = Invoke-SfCli -Command 'org list' -Debug $this.IsVerbose
+        $OrgList | Get-Member -MemberType Properties | ForEach-Object {
+            $Key = $_.Name
+            $Value = $OrgList.$Key
+            $Value | Where-Object { $_.isDefaultUsername } | ForEach-Object { $Default[ $_.username ] = $_ }
+        }
+
+        Write-Host "========== SF CLI CALLS WILL BE MADE AGAINST THE FOLLOWING USERNAME =========="
+        $Default.Values | Out-String | Write-Host
+
+        return $this
+    }
+
     [SOQLBuilder] AddSObjects([ScriptBlock]$Selector) {
         $SobjectNames = $this.GetCachedList() | Where-Object $Selector
 
