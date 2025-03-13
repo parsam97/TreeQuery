@@ -83,8 +83,8 @@ class SOQLBuilder {
             $Value | Where-Object { $_.isDefaultUsername } | ForEach-Object { $Default[ $_.username ] = $_ }
         }
 
-        Write-Host "========== SF CLI CALLS WILL BE MADE AGAINST THE FOLLOWING USERNAME =========="
-        $Default.Values | Out-String | Write-Host
+        Write-Debug "========== SF CLI CALLS WILL BE MADE AGAINST THE FOLLOWING USERNAME =========="
+        $Default.Values | Out-String | Write-Debug
 
         return $this
     }
@@ -93,7 +93,7 @@ class SOQLBuilder {
         $SobjectNames = $this.GetCachedList() | Where-Object $Selector
 
         if ($this.IsVerbose) {
-            Write-Host "$($SobjectNames.Count) selected objects: $($SobjectNames -join ", ")"
+            Write-Debug "$($SobjectNames.Count) selected objects: $($SobjectNames -join ", ")"
         }
 
         foreach ($SobjectName in $SobjectNames) {
@@ -107,7 +107,7 @@ class SOQLBuilder {
             $TargetOrgAlias = $ConfigList | Where-Object { $_.key -eq 'target-org'} | Select-Object -ExpandProperty value
             $TargetOrgUsername = $AliasList | Where-Object { $_.alias -eq $TargetOrgAlias } | Select-Object -ExpandProperty value
 
-            Write-Host "Nothing found for selector $($Selector.ToString()). Signed in as $TargetOrgUsername ($TargetOrgAlias)"
+            Write-Error "Nothing found for selector $($Selector.ToString()). Signed in as $TargetOrgUsername ($TargetOrgAlias)"
         }
 
         return $this
