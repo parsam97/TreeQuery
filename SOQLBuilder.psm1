@@ -83,7 +83,7 @@ class SOQLBuilder {
             $Value | Where-Object { $_.isDefaultUsername } | ForEach-Object { $Default[ $_.username ] = $_ }
         }
 
-        Write-Debug "========== HI SF CLI CALLS WILL BE MADE AGAINST THE FOLLOWING USERNAME =========="
+        Write-Debug "========== SF CLI CALLS WILL BE MADE AGAINST THE FOLLOWING USERNAME =========="
         $Default.Values | Out-String | Write-Debug
 
         return $this
