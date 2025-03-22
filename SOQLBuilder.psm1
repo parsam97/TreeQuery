@@ -6,7 +6,7 @@ class SOQLBuilder {
     [String]$JobName
     [SOQL[]]$SoqlArray
     [Switch]$IsVerbose
-    [Switch]$SfCliConnection
+    [String]$TargetOrg
 
     SOQLBuilder() {
         $this.Initialize()
@@ -58,12 +58,13 @@ class SOQLBuilder {
     [void] Initialize() {
         $this.SoqlArray = @()
         $this.JobName = 'TreeQuery'
-        $SfConfigTargetOrg = .\Invoke-SfCli.ps1 -Command 'config get target-org'
-        if ($SfConfigTargetOrg.status -ne 0 -or $SfConfigTargetOrg.result.Count -eq 0) {
-            Write-Error "No default org set. Use ``sf config set target org {your target org username}``"
-            exit 1
-        } else {
-            $this.SfCliConnection = $true
+        $this.SetTargetOrg()
+    }
+
+    [void] SetTargetOrg() {
+        $SfConfigTargetOrg = Invoke-SfCli -Command 'config get target-org'
+        if ($SfConfigTargetOrg.Count -gt 0 -and $SfConfigTargetOrg[0].value) {
+            $this.TargetOrg = $SfConfigTargetOrg[0].value
         }
     }
 
@@ -82,17 +83,23 @@ class SOQLBuilder {
         return $this
     }
 
-    [SOQLBuilder] PrintDefaultSf() {
-        $Default = @{}
-        $OrgList = Invoke-SfCli -Command 'org list' -Debug $this.IsVerbose
-        $OrgList | Get-Member -MemberType Properties | ForEach-Object {
-            $Key = $_.Name
-            $Value = $OrgList.$Key
-            $Value | Where-Object { $_.isDefaultUsername } | ForEach-Object { $Default[ $_.username ] = $_ }
+    [SOQLBuilder] SetTargetOrgAs([String]$TargetOrg) {
+        $SfOrgDisplay = Invoke-SfCli "org display --target-org $TargetOrg" -Debug $this.IsVerbose
+        if ($SfOrgDisplay.accessToken) {
+            $this.TargetOrg = $SfOrgDisplay.username
+        } else {
+            $this.TargetOrg = $null
         }
+        return $this
+    }
 
-        Write-Debug "========== SF CLI CALLS WILL BE MADE AGAINST THE FOLLOWING USERNAME =========="
-        $Default.Values | Out-String | Write-Debug
+    [SOQLBuilder] PrintDefaultSf() {
+        if ($this.TargetOrg) {
+            Write-Host "========== SF CLI CALLS WILL BE MADE AGAINST THE FOLLOWING TARGET ORG =========="
+            $this.TargetOrg | Write-Host
+        } else {
+            Write-Host "TargetOrg is empty: '$($this.TargetOrg)'"
+        }
 
         return $this
     }
@@ -105,10 +112,10 @@ class SOQLBuilder {
         }
 
         foreach ($SobjectName in $SobjectNames) {
-            $this.SoqlArray += [SOQL]::new($SobjectName, $this.IsVerbose)
+            $this.SoqlArray += [SOQL]::new($SobjectName, $this.IsVerbose, $this.TargetOrg)
         }
 
-        if ($this.SoqlArray.Count -eq 0) {
+        if ($this.SoqlArray.Count -eq 0 -and $this.TargetOrg) {
             $ConfigList = Invoke-SfCli -Command 'config list' -Debug $this.IsVerbose
             $AliasList = Invoke-SfCli -Command 'alias list' -Debug $this.IsVerbose
 
@@ -250,7 +257,7 @@ class SOQLBuilder {
         $SoqlDirs | ForEach-Object {
             $SoqlDirectory = $_
             $OutputDirectory = (Get-Item $SoqlDirectory).Directory.FullName
-            $Command = "data export tree --output-dir '$OutputDirectory' --query '$SoqlDirectory' --prefix $FileNamePrefix"
+            $Command = "data export tree -o $($this.TargetOrg) --output-dir '$OutputDirectory' --query '$SoqlDirectory' --prefix $FileNamePrefix"
             if ($WithPlan) { $Command += " --plan" }
             Invoke-SfCli -Command $Command -Debug $this.IsVerbose
         }
@@ -295,8 +302,18 @@ class SOQLBuilder {
         if ($null -ne $cachedResults) {
             return $cachedResults.Value
         }
-        $results = Invoke-SfCli -Command "sobject list" -Debug $this.IsVerbose
-        $this.SetCachedList($results)
+
+        if ($this.TargetOrg) {
+            $results = Invoke-SfCli -Command "sobject list --target-org $($this.TargetOrg)" -Debug $this.IsVerbose
+        } else {
+            Write-Host -ForegroundColor Red "No default org set. Either set a default target org or use the SetTargetOrgAs(`$Target-Org) method."
+            exit 1
+        }
+
+        if ($results -ne 1) {
+            $this.SetCachedList($results)
+        }
+
         return $results
     }
 

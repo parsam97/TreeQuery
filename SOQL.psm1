@@ -18,9 +18,11 @@ class SOQL {
     [Int]$Depth
     
     [Boolean]$IsVerbose
+    [String]$TargetOrg
 
-    SOQL([String]$SobjectName, [Boolean]$IsVerbose) {
+    SOQL([String]$SobjectName, [Boolean]$IsVerbose, [String]$TargetOrg) {
         $this.IsVerbose = $IsVerbose
+        $this.TargetOrg = $TargetOrg
         $this.Depth = 0
         $this.CacheKey = "TreeQuery:$SobjectName"
         $this.SobjectName = $SobjectName
@@ -209,8 +211,18 @@ class SOQL {
         if ($null -ne $cachedResults) {
             return $cachedResults.Value
         }
-        $results = Invoke-SfCli -Command "sobject describe -s $($this.SobjectName)" -Debug $this.IsVerbose
-        $this.SetCachedDescribe($results)
+
+        if ($this.TargetOrg) {
+            $results = Invoke-SfCli -Command "sobject describe -o $($this.TargetOrg) --sobject $($this.SobjectName)" -Debug $this.IsVerbose
+        } else {
+            Write-Host -ForegroundColor Red "No default org set. Either set a default target org or use the SetTargetOrgAs(`$Target-Org) method."
+            exit 1
+        }
+
+        if ($results -ne 1) {
+            $this.SetCachedDescribe($results)
+        }
+
         return $results
     }
 
