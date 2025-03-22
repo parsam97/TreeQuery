@@ -6,6 +6,7 @@ class SOQLBuilder {
     [String]$JobName
     [SOQL[]]$SoqlArray
     [Switch]$IsVerbose
+    [Switch]$SfCliConnection
 
     SOQLBuilder() {
         $this.Initialize()
@@ -57,6 +58,13 @@ class SOQLBuilder {
     [void] Initialize() {
         $this.SoqlArray = @()
         $this.JobName = 'TreeQuery'
+        $SfConfigTargetOrg = .\Invoke-SfCli.ps1 -Command 'config get target-org'
+        if ($SfConfigTargetOrg.status -ne 0 -or $SfConfigTargetOrg.result.Count -eq 0) {
+            Write-Error "No default org set. Use ``sf config set target org {your target org username}``"
+            exit 1
+        } else {
+            $this.SfCliConnection = $true
+        }
     }
 
     [SOQLBuilder] MakeVerbose() {
