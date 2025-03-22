@@ -12,7 +12,7 @@
 RootModule = '.\TreeQuery.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.0.6'
+ModuleVersion = '1.0.7'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -126,7 +126,7 @@ PrivateData = @{
 # HelpInfoURI = ''
 
 # Default prefix for commands exported from this module. Override the default prefix using Import-Module -Prefix.
-DefaultCommandPrefix = 'https://github.com/parsam97/TreeQuery.git'
+# DefaultCommandPrefix = ''
 
 }
 
