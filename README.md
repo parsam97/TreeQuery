@@ -280,6 +280,7 @@ FROM Account
 - [SOQLBuilder] AddParentQueries([SOQLBuilder]$ParentBuilder)
 - [SOQLBuilder] ExcludeId()
 - [SOQLBuilder] GetQueryTexts()
+- [SOQLBuilder] GetQuerySObjects()
 - [SOQLBuilder] Export()
 - [SOQLBuilder] Export([Boolean]$WithPlan)
 - [SOQLBuilder] Execute() // uses `sf data export tree`

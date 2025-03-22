@@ -212,6 +212,15 @@ class SOQLBuilder {
         return $this.SoqlArray | ForEach-Object { $_.GetQueryClean() }
     }
 
+    [Object[]] GetQuerySObjects() {
+        return $this.SoqlArray | ForEach-Object { $_.SobjectName }
+    }
+
+    [SOQLBuilder] Clear() {
+        $this.SoqlArray = @()
+        return $this
+    }
+
     [SOQLBuilder] Export() {
         $this.ExportToFile($this.JobName) | Out-Null
         return $this
