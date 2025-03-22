@@ -1,3 +1,5 @@
+. '.\Invoke-SfCli.ps1'
+
 class SOQL {
     [String]$CacheKey
     [Object]$DescribeInfo

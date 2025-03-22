@@ -1,3 +1,6 @@
+using module .\SOQL.psm1
+. '.\Invoke-SfCli.ps1'
+
 class SOQLBuilder {
     [String]$JobName
     [SOQL[]]$SoqlArray
