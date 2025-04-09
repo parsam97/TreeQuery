@@ -9,6 +9,7 @@ class SOQL {
     [String]$WhereClause
     [Object]$OrderByFields
     [String]$OrderByDirection
+    [String]$DefaultOrderByDirection = 'ASC'
     [Int]$Limit
     [Int]$Offset
     
@@ -96,6 +97,15 @@ class SOQL {
 
     [void] AddWhere([String]$WhereClause) {
         $this.WhereClause = $WhereClause
+    }
+
+    [void] AddOrderBy([String]$FieldName) {
+        $this.OrderByDirection = $this.DefaultOrderByDirection
+        $this.AddOrderByField($FieldName)
+    }
+
+    [void] AddOrderBy([ScriptBlock]$Selector) {
+        $this.AddOrderBy($Selector, $this.DefaultOrderByDirection)
     }
 
     [void] AddOrderBy([ScriptBlock]$Selector, [String]$Direction) {
