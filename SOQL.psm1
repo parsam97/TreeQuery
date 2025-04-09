@@ -30,6 +30,7 @@ class SOQL {
         $this.FieldNames = New-Object System.Collections.Generic.HashSet[String]
         $this.ChildQueries = New-Object System.Collections.Generic.HashSet[String]
         $this.OrderByFields = New-Object System.Collections.Generic.HashSet[String]
+        $this.OrderByDirection = 'ASC'
         $this.GroupedFieldNames = @()
         $this.AddField('Id')
     }
