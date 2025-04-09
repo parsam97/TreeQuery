@@ -8,7 +8,7 @@ class SOQL {
     [Object]$ChildQueries
     [String]$WhereClause
     [Object]$OrderByFields
-    [String]$OrderByDirection
+    [String]$OrderByDirection = 'ASC'
     [Int]$Limit
     [Int]$Offset
     
