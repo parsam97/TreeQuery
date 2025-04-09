@@ -8,7 +8,7 @@ class SOQL {
     [Object]$ChildQueries
     [String]$WhereClause
     [Object]$OrderByFields
-    [String]$OrderByDirection = 'ASC'
+    [String]$OrderByDirection
     [Int]$Limit
     [Int]$Offset
     
@@ -30,7 +30,6 @@ class SOQL {
         $this.FieldNames = New-Object System.Collections.Generic.HashSet[String]
         $this.ChildQueries = New-Object System.Collections.Generic.HashSet[String]
         $this.OrderByFields = New-Object System.Collections.Generic.HashSet[String]
-        $this.OrderByDirection = 'ASC'
         $this.GroupedFieldNames = @()
         $this.AddField('Id')
     }
