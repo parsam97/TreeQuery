@@ -104,6 +104,11 @@ class SOQL {
         $this.AddOrderByField($FieldName)
     }
 
+    [void] AddOrderBy([String]$FieldName, [String]$Direction) {
+        $this.OrderByDirection = $Direction
+        $this.AddOrderByField($FieldName)
+    }
+
     [void] AddOrderBy([ScriptBlock]$Selector) {
         $this.AddOrderBy($Selector, $this.DefaultOrderByDirection)
     }
